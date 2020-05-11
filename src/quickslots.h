@@ -29,6 +29,7 @@
 
 //#include "f4se/InternalTasks.h"
 #include "f4se/PapyrusEvents.h"
+#include "f4se/GameThreads.h"
 #include "common/ISingleton.h"
 
 #include "timer.h"
@@ -231,21 +232,21 @@ private:
 	UInt32							mSpellsiphonModIndex = 0;
 };
 
-typedef bool(*_HasSpell)(VMClassRegistry * registry, UInt64 stackID, Actor *actor, TESForm *akSpell);
-extern RelocAddr <_HasSpell> HasSpell;
+//typedef bool(*_HasSpell)(VMClassRegistry * registry, UInt64 stackID, Actor *actor, TESForm *akSpell);
+//extern RelocAddr <_HasSpell> HasSpell;
 
-typedef void(*_ActorEquipItem)(VMClassRegistry * registry, UInt64 stackID, Actor *actor, TESForm *akItem, bool abPreventRemoval, bool abSilent);
+typedef void(*_ActorEquipItem)(VirtualMachine * registry, UInt64 stackID, Actor *actor, TESForm *akItem, bool abPreventRemoval, bool abSilent);
 extern RelocAddr <_ActorEquipItem> ActorEquipItem;
 
-typedef UInt32(*_GetItemCount)(VMClassRegistry * registry, UInt64 stackID, TESObjectREFR *actorRefr, TESForm *akItem);
+typedef UInt32(*_GetItemCount)(VirtualMachine* registry, UInt64 stackID, TESObjectREFR *actorRefr, TESForm *akItem);
 extern RelocAddr <_GetItemCount> GetItemCount;
 
-typedef TESObjectREFR*(*_DropObject)(VMClassRegistry * registry, UInt64 stackID, TESObjectREFR *actorRefr, TESForm *akItem, int aiCount);
-extern RelocAddr <_DropObject> DropObject;
+//typedef TESObjectREFR*(*_DropObject)(VMClassRegistry * registry, UInt64 stackID, TESObjectREFR *actorRefr, TESForm *akItem, int aiCount);
+//extern RelocAddr <_DropObject> DropObject;
 
-extern SKSETaskInterface	* g_task;
+extern F4SETaskInterface	* g_task;
 
-class taskActorEquipItem : public TaskDelegate
+class taskActorEquipItem : public ITaskDelegate
 {
 public:
 	virtual void Run();

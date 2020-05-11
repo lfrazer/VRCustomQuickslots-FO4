@@ -167,11 +167,25 @@
     <ClCompile Include="src/main.cpp" />
     <ClCompile Include="src\api\PapyrusVRTypes.cpp" />
     <ClCompile Include="src\config.cpp" />
-    <ClCompile Include="src\console.cpp" />
+    <ClCompile Include="src\console.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="src\MenuChecker.cpp" />
     <ClCompile Include="src\quickslots.cpp" />
     <ClCompile Include="src\timer.cpp" />
     <ClCompile Include="src\tinyxml2.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="src\common\common_vc14.vcxproj">
+      <Project>{472e19ab-def0-42df-819b-18722e8dc822}</Project>
+    </ProjectReference>
+    <ProjectReference Include="src\f4sevr\f4se\f4se.vcxproj">
+      <Project>{a236f69d-8ff9-4491-ac5f-45bf49448bbe}</Project>
+    </ProjectReference>
+    <ProjectReference Include="src\f4sevr\f4se_common\f4se_common.vcxproj">
+      <Project>{20c6411c-596f-4b85-be4e-8bc91f59d8a6}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

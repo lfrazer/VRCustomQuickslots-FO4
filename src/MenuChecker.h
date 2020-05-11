@@ -1,28 +1,69 @@
-#ifndef MENUCHECKER_H
-#define MENUCHECKER_H
-
 #pragma once
-#include "skse64/GameReferences.h"
-
-#include "skse64/PapyrusVM.h"
+#include "f4se/GameReferences.h"
+#include "f4se/GameMenus.h"
+#include "f4se/PapyrusVM.h"
 #include <unordered_map>
 
-#include "quickslotutil.h"
+// Thanks to Shizof for this
 
 namespace MenuChecker
 {
 	extern std::vector<std::string> gameStoppingMenus;
 
+	extern std::vector<std::string> gameStoppingMenusNoDialogue;
+
 	extern std::unordered_map<std::string, bool> menuTypes;
 
 	bool isGameStopped();
 
-	class AllMenuEventHandler : public BSTEventSink <MenuOpenCloseEvent> {
+	bool isGameStoppedNoDialogue();
+
+	bool isVatsActive();
+
+
+	class MenuOpenCloseHandler : public BSTEventSink<MenuOpenCloseEvent>
+	{
 	public:
-		virtual EventResult	ReceiveEvent(MenuOpenCloseEvent * evn, EventDispatcher<MenuOpenCloseEvent> * dispatcher);
-	};
+		virtual ~MenuOpenCloseHandler() { };
+		virtual	EventResult	ReceiveEvent(MenuOpenCloseEvent * evn, void * dispatcher) override
+		{
+			if (!evn)
+				return kEvent_Continue;
 
-	extern AllMenuEventHandler menuEvent;
+			const char * menuName = evn->menuName.c_str();
+
+			if (evn->isOpen) //Menu opened
+			{
+				//LOG("Menu %s opened.", menuName);
+				if (menuTypes.find(menuName) != menuTypes.end())
+				{
+					menuTypes[menuName] = true;
+				}
+			}
+			else  //Menu closed
+			{
+				//LOG("Menu %s closed.", menuName);
+				if (menuTypes.find(menuName) != menuTypes.end())
+				{
+					menuTypes[menuName] = false;
+				}
+				/*if(!isGameStopped())
+				{
+					_MESSAGE("WeaponFiredEvent sinks before count: %d", GetSingletonEventDispatcher(WeaponFiredEvent).eventSinks.count);
+
+				GetSingletonEventDispatcher(WeaponFiredEvent).AddEventSink(&TactsuitVR::g_WeaponFiredEventHandler);
+
+				_MESSAGE("WeaponFiredEvent sinks after count: %d", GetSingletonEventDispatcher(WeaponFiredEvent).eventSinks.count);
+				}*/
+			}
+
+			return kEvent_Continue;
+		};
+
+		static void Register()
+		{
+			static auto * pHandler = new MenuOpenCloseHandler();
+			(*g_ui)->menuOpenCloseEventSource.AddEventSink(pHandler); //V1.10.26
+		}
+	};	
 }
-
-#endif

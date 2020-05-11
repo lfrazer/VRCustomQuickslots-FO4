@@ -46,10 +46,10 @@ const int VRCUSTOMQUICKSLOTS_VERSION = 5;
 
 extern "C" {
 
-	void OnSKSEMessage(F4SEMessagingInterface::Message* msg);
+	void OnF4SEMessage(F4SEMessagingInterface::Message* msg);
 
 	bool F4SEPlugin_Query(const F4SEInterface * f4se, PluginInfo * info) {	// Called by SKSE to learn about this plugin and check that it's safe to load it
-		gLog.OpenRelative(CSIDL_MYDOCUMENTS, "\\My Games\\Skyrim VR\\SKSE\\VRCustomQuickslots.log");
+		gLog.OpenRelative(CSIDL_MYDOCUMENTS, "\\My Games\\Fallout4VR\\F4SE\\VRCustomQuickslots.log");
 		gLog.SetPrintLevel(IDebugLog::kLevel_Error);
 		gLog.SetLogLevel(IDebugLog::kLevel_DebugMessage);
 
@@ -67,7 +67,7 @@ extern "C" {
 
 			return false;
 		}
-		else if (f4se->runtimeVersion != RUNTIME_VR_VERSION_1_4_15)
+		else if (f4se->runtimeVersion < CURRENT_RELEASE_RUNTIME)
 		{
 			_MESSAGE("unsupported runtime version %08X", f4se->runtimeVersion);
 
@@ -95,7 +95,7 @@ extern "C" {
 		//Registers for SKSE Messages (PapyrusVR probably still need to load, wait for SKSE message PostLoad)
 		_MESSAGE("Registering for SKSE messages");
 		g_messaging = (F4SEMessagingInterface*)f4se->QueryInterface(kInterface_Messaging);
-		g_messaging->RegisterListener(g_pluginHandle, "SKSE", OnSKSEMessage);
+		g_messaging->RegisterListener(g_pluginHandle, "SKSE", OnF4SEMessage);
 
 
 
@@ -236,7 +236,7 @@ extern "C" {
 	}
 
 	//Listener for PapyrusVR Messages
-	void OnPapyrusVRMessage(SKSEMessagingInterface::Message* msg)
+	void OnPapyrusVRMessage(F4SEMessagingInterface::Message* msg)
 	{
 		if (msg)
 		{
@@ -250,19 +250,19 @@ extern "C" {
 	}
 
 	//Listener for SKSE Messages
-	void OnSKSEMessage(SKSEMessagingInterface::Message* msg)
+	void OnF4SEMessage(F4SEMessagingInterface::Message* msg)
 	{
 		// path to XML config file for unique character ID - will be set on PreLoadGame message
 		static char sConfigUniqueIdPath[MAX_PATH] = { 0 };
 
 		if (msg)
 		{
-			if (msg->type == SKSEMessagingInterface::kMessage_PostLoad)
+			if (msg->type == F4SEMessagingInterface::kMessage_PostLoad)
 			{
-				_MESSAGE("SKSE PostLoad message received, registering for PapyrusVR messages from SkyrimVRTools");  // This log msg may happen before XML is loaded
-				g_messaging->RegisterListener(g_pluginHandle, "SkyrimVRTools", OnPapyrusVRMessage);
+				_MESSAGE("SKSE PostLoad message received, registering for PapyrusVR messages from FO4VRTools");  // This log msg may happen before XML is loaded
+				g_messaging->RegisterListener(g_pluginHandle, "FO4VRTools", OnPapyrusVRMessage);
 			}
-			else if (msg->type == SKSEMessagingInterface::kMessage_DataLoaded) //This is needed because we check plugins for items now in ReadConfig function.
+			else if (msg->type == F4SEMessagingInterface::kMessage_PreLoadGame) // Use to be DataLoaded //This is needed because we check plugins for items now in ReadConfig function.
 			{
 				if (g_papyrusvr)
 				{
@@ -298,7 +298,7 @@ extern "C" {
 					_MESSAGE("PapyrusVR was not initialized!");
 				}
 			}
-			else if (msg->type == SKSEMessagingInterface::kMessage_PreLoadGame)
+			else if (msg->type == F4SEMessagingInterface::kMessage_PreLoadGame)
 			{
 				char saveGameDataFile[MAX_PATH] = { 0 };
 				const int NUM_SAVE_TOKENS = 20;
@@ -348,12 +348,12 @@ extern "C" {
 
 
 			}
-			else if (msg->type == SKSEMessagingInterface::kMessage_PostLoadGame || msg->type == SKSEMessagingInterface::kMessage_NewGame)
+			else if (msg->type == F4SEMessagingInterface::kMessage_PostLoadGame || msg->type == F4SEMessagingInterface::kMessage_NewGame)
 			{
 				QSLOG("SKSE PostLoadGame or NewGame message received, type: %d", msg->type);
 				g_quickslotMgr->SetInGame(true);
 			}
-			else if (msg->type == SKSEMessagingInterface::kMessage_SaveGame)
+			else if (msg->type == F4SEMessagingInterface::kMessage_PreSaveGame)
 			{
 				QSLOG("SKSE SaveGame message received.");
 

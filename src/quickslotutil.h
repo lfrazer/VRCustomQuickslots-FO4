@@ -36,6 +36,7 @@
 #include <algorithm>
 
 #include "f4se/GameObjects.h"
+#include "f4se/GameReferences.h"
 #include "f4se/GameData.h"
 #include "f4se/GameRTTI.h"
 #include "f4se/GameExtraData.h"
@@ -299,6 +300,7 @@ inline std::vector<UInt32> GetAllPotions(bool allplugins, UInt8 modIndex, std::v
 }
 */
 
+/*
 //A modified version of SKSE GetAllAmmo function to get vector as input instead of VMArray. Also keywordsNot checks.
 inline std::vector<UInt32> GetAllAmmo(bool allplugins, UInt8 modIndex, std::vector<BGSKeyword*> keywords, std::vector<BGSKeyword*> keywordsNot)
 {
@@ -329,7 +331,9 @@ inline std::vector<UInt32> GetAllAmmo(bool allplugins, UInt8 modIndex, std::vect
 
 	return result;
 }
+*/
 
+/*
 inline bool CanEquipBothHands(Actor* actor, TESForm * item)
 {
 	BGSEquipType * equipType = DYNAMIC_CAST(item, TESForm, BGSEquipType);
@@ -353,48 +357,42 @@ inline bool CanEquipBothHands(Actor* actor, TESForm * item)
 
 	return false;
 }
+*/
 
-inline BGSEquipSlot * GetEquipSlotById(SInt32 slotId)
+
+// Thanks to Shizof for this
+TESObjectWEAP* GetEquippedWeaponForm(Actor* actor)
 {
-	enum
+	if (actor->equipData)
 	{
-		kSlotId_Default = 0,
-		kSlotId_Right = 1,
-		kSlotId_Left = 2
-	};
-
-	if (slotId == kSlotId_Right)
-		return GetRightHandSlot();
-	else if (slotId == kSlotId_Left)
-		return GetLeftHandSlot();
-	else
-		return NULL;
+		auto slots = { 0x20, 0x21, 0x25, 0x29 };
+		for (UInt32 slotId : slots)
+		{
+			if (actor->equipData->slots[slotId].item != nullptr)
+			{
+				TESForm* equippedForm = actor->equipData->slots[slotId].item;
+				if (equippedForm)
+				{
+					if (equippedForm->formType == TESObjectWEAP::kTypeID)
+					{
+						return DYNAMIC_CAST(equippedForm, TESForm, TESObjectWEAP);
+					}
+				}
+			}
+		}
+	}
+	return nullptr;
 }
 
 //Checks if supplied formId is currently equipped by the player. Checks item, spell, and shout equips.
 inline bool FormCurrentlyEquipped(UInt32 formId)
 {
 	Actor * player = (Actor*)(*g_player);
-	TESForm * rightEquipped = player->GetEquippedObject(false);
-	TESForm * leftEquipped = player->GetEquippedObject(true);
+	// only right hand in FO4
+	TESForm* rightEquipped = GetEquippedWeaponForm(player);
+
 
 	if (rightEquipped && rightEquipped->formID == formId)
-	{
-		return true;
-	}
-	else if (leftEquipped && leftEquipped->formID == formId)
-	{
-		return true;
-	}
-	else if(player->leftHandSpell && player->leftHandSpell->formID == formId)
-	{
-		return true;
-	}
-	else if (player->rightHandSpell && player->rightHandSpell->formID == formId)
-	{
-		return true;
-	}
-	else if (player->equippedShout && player->equippedShout->formID == formId)
 	{
 		return true;
 	}

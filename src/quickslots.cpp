@@ -21,38 +21,32 @@
 
 #include "quickslots.h"
 #include "quickslotutil.h"
-#include "console.h"
+//#include "console.h"
 #include "api/openvr.h"
 #include <algorithm>
 
 #include "MenuChecker.h"
 
 // SKSE includes
-#include "skse64/PapyrusActor.h"
-#include "skse64/GameAPI.h"
-#include "skse64/GameForms.h"
-#include "skse64/GameRTTI.h"
-#include "skse64/GameTypes.h"
-#include "skse64/GameExtraData.h"
+#include "f4se/PapyrusActor.h"
+#include "f4se/GameAPI.h"
+#include "f4se/GameForms.h"
+#include "f4se/GameRTTI.h"
+#include "f4se/GameTypes.h"
+#include "f4se/GameExtraData.h"
 
 #define QS_DEBUG_FEATURES   0
 
-RelocAddr <_HasSpell> HasSpell(0x0984420);
+//RelocAddr <_HasSpell> HasSpell(0x0984420);
 RelocAddr <_ActorEquipItem> ActorEquipItem(0x09849C0);
 RelocAddr <_GetItemCount> GetItemCount(0x09CEC90);
-RelocAddr <_DropObject> DropObject(0x09CE580);
+//RelocAddr <_DropObject> DropObject(0x09CE580);
 
 
 CQuickslotManager::CQuickslotManager()
 {
-	MenuManager * mm = MenuManager::GetSingleton();
-	if (mm) {
-		mm->MenuOpenCloseEventDispatcher()->AddEventSink(&MenuChecker::menuEvent);
-	}
-	else {
-		QSLOG_ERR("Failed to register SKSE AllMenuEventHandler!");
-	}
-
+	MenuChecker::MenuOpenCloseHandler::Register();
+	
 	GetVRSystem();
 
 }
@@ -514,7 +508,7 @@ void CQuickslot::PrintInfo()
 //Checks if player has the item in their inventory. Calls GetItemCount Native function and checks if it's bigger than 0.
 bool CQuickslot::PlayerHasItem(TESForm * itemForm)
 {
-	return GetItemCount((*g_skyrimVM)->GetClassRegistry(), 0, (Actor*)(*g_thePlayer), itemForm) != 0;
+	return GetItemCount((*g_gameVM)->m_virtualMachine, 0, (Actor*)(*g_player), itemForm) != 0;
 }
 
 bool CQuickslot::DoAction(const CQuickslotCmd& cmd, UInt32 formId)
@@ -565,103 +559,6 @@ bool CQuickslot::DoAction(const CQuickslotCmd& cmd, UInt32 formId)
 			return false;
 		}
 	}
-	else if (cmd.mAction == DROP_OBJECT)
-	{
-		TESForm* itemFormObj = LookupFormByID(formId);
-		if (itemFormObj != nullptr)
-		{
-			QSLOG_INFO("Checking if player has object with formid: %x", formId);
-			if (PlayerHasItem(itemFormObj)) //We check if player has the item and return false if they do not.
-			{
-				QSLOG_INFO("Dropping item formId: %x", formId);
-				DropObject((*g_skyrimVM)->GetClassRegistry(), 0, (Actor*)(*g_thePlayer), itemFormObj, cmd.mCount);
-			}
-			else
-			{
-				QSLOG_INFO("Player doesn't have object with formId: %x", formId);
-				return false;
-			}
-		}
-		else
-		{
-			QSLOG_ERR("Invalid item formId: %x", formId);
-			return false;
-		}
-	}
-	else if (cmd.mAction == EQUIP_SPELL)
-	{
-		TESForm * spellForm = LookupFormByID(formId);
-
-		if (spellForm != nullptr)
-		{
-			//Check if player knows the spell to prevent cheating (special allowance for spellsiphon though)
-			if ( (GetModIndex(formId) == CQuickslotManager::GetSingleton().GetSpellsiphonModIndex()) || HasSpell((*g_skyrimVM)->GetClassRegistry(), 0, (Actor*)(*g_thePlayer), spellForm))
-			{
-				const char* slotNames[3] = { "default", "right", "left" };  // should match eSlotType
-				const size_t cmdBufferSize = 255;
-				char cmdBuffer[cmdBufferSize];
-
-				if (cmd.mSlot == SLOT_DEFAULT)  // equip in both hands if its slot default
-				{
-					sprintf_s(cmdBuffer, cmdBufferSize, "player.equipspell %x left", formId);
-					CSkyrimConsole::RunCommand(cmdBuffer);
-
-					sprintf_s(cmdBuffer, cmdBufferSize, "player.equipspell %x right", formId);
-					CSkyrimConsole::RunCommand(cmdBuffer);
-				}
-				else if (cmd.mSlot <= SLOT_LEFTHAND)
-				{
-					sprintf_s(cmdBuffer, cmdBufferSize, "player.equipspell %x %s", formId, slotNames[CQuickslotManager::GetSingleton().GetEffectiveSlot(cmd.mSlot)]);
-					CSkyrimConsole::RunCommand(cmdBuffer);
-				}
-				else
-				{
-					QSLOG_ERR("Invalid slot Type %d for spell: %x equip.", cmd.mSlot, formId);
-					return false;
-				}
-			}
-			else
-			{
-				QSLOG_INFO("Player doesn't know spell: %x", formId);
-				return false;
-			}
-		}
-		else
-		{
-			QSLOG_ERR("Invalid spell formId: %x", formId);
-			return false;
-		}
-	}
-	else if (cmd.mAction == EQUIP_SHOUT)
-	{
-		TESForm * spellForm = LookupFormByID(formId);
-
-		if (spellForm != nullptr)
-		{
-			//Check if player knows the shout to prevent cheating (same check for spellsiphon)
-			if ((GetModIndex(formId) == CQuickslotManager::GetSingleton().GetSpellsiphonModIndex()) || HasSpell((*g_skyrimVM)->GetClassRegistry(), 0, (Actor*)(*g_thePlayer), spellForm))
-			{
-				const size_t cmdBufferSize = 255;
-				char cmdBuffer[cmdBufferSize];
-				sprintf_s(cmdBuffer, cmdBufferSize, "player.equipshout %x", formId);
-				CSkyrimConsole::RunCommand(cmdBuffer);
-			}
-			else
-			{
-				QSLOG_INFO("Player doesn't know shout: %x", formId);
-				return false;
-			}
-		}
-		else
-		{
-			QSLOG_ERR("Invalid shout formId: %x", formId);
-			return false;
-		}
-	}
-	else if (cmd.mAction == CONSOLE_CMD)
-	{
-		CSkyrimConsole::RunCommand(cmd.mConsoleCommand.c_str());
-	}
 	else
 	{
 		return false;
@@ -679,7 +576,7 @@ void CQuickslot::SetAction(PapyrusVR::VRDevice deviceId)
 	const int effectiveSlot = CQuickslotManager::GetSingleton().GetEffectiveSlot(slot);
 
 	// set action for only the current hand
-	TESForm* formObj = (*g_thePlayer)->GetEquippedObject(effectiveSlot == SLOT_LEFTHAND);
+	TESForm* formObj = GetEquippedWeaponForm(*g_player);
 
 	auto SetCommand = [formObj, slot](CQuickslotCmd& cmd)
 	{
@@ -764,7 +661,7 @@ taskActorEquipItem::taskActorEquipItem(TESForm* akItem)
 
 void taskActorEquipItem::Run()
 {
-	ActorEquipItem((*g_skyrimVM)->GetClassRegistry(), 0, (Actor*)(*g_thePlayer), m_akItem, false, false);
+	ActorEquipItem((*g_gameVM)->m_virtualMachine, 0, (Actor*)(*g_player), m_akItem, false, false);
 }
 
 void taskActorEquipItem::Dispose()

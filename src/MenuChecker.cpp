@@ -1,11 +1,45 @@
 #include "MenuChecker.h"
 
+// Thanks to Shizof for this
+
 namespace MenuChecker
-{
-	// constants
-	const double					kMenuBlockDelay = 0.25;  // time in seconds to block actions after menu was closed
-	double							mMenuLastCloseTime = -1.0; // track the last time the menu was closed (negative means invalid time / do not track time)
-	
+{	
+	std::vector<std::string> gameStoppingMenusNoDialogue{
+		"BarterMenu",
+		"Book Menu",
+		"Console",
+		"Native UI Menu",
+		"ContainerMenu",
+		"Crafting Menu",
+		"Credits Menu",
+		"Cursor Menu",
+		"Debug Text Menu",
+		"FavoritesMenu",
+		"GiftMenu",
+		"InventoryMenu",
+		"Journal Menu",
+		"Kinect Menu",
+		"LoadingMenu",
+		"Lockpicking Menu",
+		"MagicMenu",
+		"MainMenu",
+		"PipboyMenu",
+		"LevelUpMenu",
+		"PauseMenu",
+		"MapMarkerText3D",
+		"MapMenu",
+		"MessageBoxMenu",
+		"Mist Menu",
+		"Quantity Menu",
+		"RaceSex Menu",
+		"Sleep/Wait Menu",
+		"StatsMenuSkillRing",
+		"StatsMenuPerks",
+		"Training Menu",
+		"Tutorial Menu",
+		"TweenMenu"
+	};
+
 	std::vector<std::string> gameStoppingMenus{
 		"BarterMenu",
 		"Book Menu",
@@ -22,10 +56,13 @@ namespace MenuChecker
 		"InventoryMenu",
 		"Journal Menu",
 		"Kinect Menu",
-		"Loading Menu",
+		"LoadingMenu",
 		"Lockpicking Menu",
 		"MagicMenu",
-		"Main Menu",
+		"PipboyMenu",
+		"LevelUpMenu",
+		"MainMenu",
+		"PauseMenu",
 		"MapMarkerText3D",
 		"MapMenu",
 		"MessageBoxMenu",
@@ -51,17 +88,18 @@ namespace MenuChecker
 		{ "Credits Menu", false },
 		{ "Cursor Menu", false },
 		{ "Debug Text Menu", false },
-		{ "Fader Menu", false },
+		{ "FaderMenu", false },
 		{ "FavoritesMenu", false },
 		{ "GiftMenu", false },
-		{ "HUD Menu", false },
+		{ "HUDMenu", false },
 		{ "InventoryMenu", false },
 		{ "Journal Menu", false },
 		{ "Kinect Menu", false },
-		{ "Loading Menu", false },
+		{ "LoadingMenu", false },
+		{ "LevelUpMenu", false },
 		{ "Lockpicking Menu", false },
 		{ "MagicMenu", false },
-		{ "Main Menu", false },
+		{ "MainMenu", false },
 		{ "MapMarkerText3D", false },
 		{ "MapMenu", false },
 		{ "MessageBoxMenu", false },
@@ -82,47 +120,61 @@ namespace MenuChecker
 		{ "WSEnemyMeters", false },
 		{ "WSDebugOverlay", false },
 		{ "WSActivateRollover", false },
+		{ "WSPrimaryTouchpadInput", false },
+		{ "WSSecondaryTouchpadInput", false },
+		{ "PipboyMenu", false },
+		{ "PauseMenu", false },
+		{ "WSCompass", false },
+		{ "WSEnemyHealth", false },
+		{ "WSLootMenu", false },
+		{ "WSHMDHUDInfo", false },
+		{ "WSHMDHUDStatus", false },
+		{ "WSInteractRolloverPrimary", false },
+		{ "WSInteractRolloverSecondary", false },
+		{ "WSPrimaryWandHUD", false },
+		{ "WSScope", false },
+		{ "VATSMenu", false },
+		{ "PowerArmorHUDMenu", false },
+		{ "WSPowerArmorOverlay", false },
 		{ "LoadWaitSpinner", false }
 	});
 
 	//Menu open event functions
-	AllMenuEventHandler menuEvent;
+	
+	
+	
+	//AllMenuEventHandler menuEvent;
+	//	
+	//EventResult AllMenuEventHandler::ReceiveEvent(MenuOpenCloseEvent* evn, BSTEventDispatcher<MenuOpenCloseEvent> * dispatcher)
+	//{
+	//	if (!evn)
+	//		return kEvent_Continue;
 
-	EventResult AllMenuEventHandler::ReceiveEvent(MenuOpenCloseEvent * evn, EventDispatcher<MenuOpenCloseEvent> * dispatcher)
-	{
-		std::string menuName = evn->menuName.data;
+	//	const char * menuName = evn->menuName.c_str();
 
-		if (evn->opening) //Menu opened
-		{			
-			if (menuTypes.find(menuName) != menuTypes.end())
-			{
-				menuTypes[menuName] = true;
-			}
-		}
-		else  //Menu closed
-		{
-			if (menuTypes.find(menuName) != menuTypes.end())
-			{
-				menuTypes[menuName] = false;
+	//	if (evn->isOpen) //Menu opened
+	//	{
+	//		LOG("Menu %s opened.", menuName);
+	//		if (menuTypes.find(menuName) != menuTypes.end())
+	//		{
+	//			menuTypes[menuName] = true;
+	//		}
+	//	}
+	//	else  //Menu closed
+	//	{
+	//		LOG("Menu %s closed.", menuName);
+	//		if (menuTypes.find(menuName) != menuTypes.end())
+	//		{
+	//			menuTypes[menuName] = false;
+	//		}
+	//	}
 
-				if (std::find(gameStoppingMenus.begin(), gameStoppingMenus.end(), menuName) != gameStoppingMenus.end()) 
-				{
-					// GameStoppingMenus contains menu
-					mMenuLastCloseTime = CUtil::GetSingleton().GetLastTime();
-				}
-			}
-		}
-
-		return EventResult::kEvent_Continue;
-	}
+	//	return kEvent_Continue;
+	//}
 
 	bool isGameStopped()
 	{
-		if(mMenuLastCloseTime + kMenuBlockDelay > CUtil::GetSingleton().GetLastTime())
-		{
-			return true;
-		}
-		for (int i = 0; i < gameStoppingMenus.size(); i++) 
+		for (int i = 0; i < gameStoppingMenus.size(); i++)
 		{
 			if (menuTypes[gameStoppingMenus[i]] == true)
 				return true;
@@ -130,5 +182,19 @@ namespace MenuChecker
 		return false;
 	}
 
+	bool isGameStoppedNoDialogue()
+	{
+		for (int i = 0; i < gameStoppingMenusNoDialogue.size(); i++)
+		{
+			if (menuTypes[gameStoppingMenusNoDialogue[i]] == true)
+				return true;
+		}
+		return false;
+	}
+
+	bool isVatsActive()
+	{
+		return menuTypes["VATSMenu"] == true;
+	}
 }
 

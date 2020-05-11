@@ -22,9 +22,10 @@
 #include "quickslots.h"
 #include "quickslotutil.h"
 #include "tinyxml2.h"
-#include "skse64/GameData.h"
-#include "skse64/PapyrusKeyword.h"
-#include "skse64/PapyrusGameData.cpp"
+#include "f4se/GameData.h"
+#include "f4se/GameSettings.h"
+//#include "f4se/PapyrusKeyword.h"
+//#include "f4se/PapyrusGameData.cpp"
 
 
 bool   CQuickslotManager::ReadConfig(const char* filename)
@@ -51,7 +52,7 @@ bool   CQuickslotManager::ReadConfig(const char* filename)
 	Reset();  // reset current quickslot data
 
 	// special case setup for spellsiphon
-	mSpellsiphonModIndex = DataHandler::GetSingleton()->GetLoadedModIndex("Spellsiphon.esp");
+	//mSpellsiphonModIndex = DataHandler::GetSingleton()->GetLoadedModIndex("Spellsiphon.esp");
 
 	int quickslotCount = 0;
 	tinyxml2::XMLElement* root = xmldoc.RootElement();
@@ -128,7 +129,7 @@ bool   CQuickslotManager::ReadConfig(const char* filename)
 						cmd.mAction = CQuickslot::DROP_OBJECT;
 					}
 
-					DataHandler * dataHandler = DataHandler::GetSingleton();
+					DataHandler * dataHandler = *g_dataHandler;
 					bool allPlugins = true;
 					UInt8 modIndex = 0;
 					std::string formIdString;
@@ -424,7 +425,7 @@ bool	CQuickslotManager::WriteConfig(const char* filename)
 				}
 				else
 				{
-					DataHandler* dataHandler = DataHandler::GetSingleton();
+					DataHandler* dataHandler = *g_dataHandler;
 					ModInfo* modInfo = dataHandler->modList.loadedMods[modIdx];
 
 					if (modInfo)
