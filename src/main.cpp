@@ -1,5 +1,5 @@
 /*
-	VRCustomQuickslots - VR Custom Quickslots SKSE extension for Fallout4 VR
+	VRCustomQuickslots - VR Custom Quickslots F4SE extension for Fallout4 VR
 	Copyright (C) 2020 L Frazer
 	https://github.com/lfrazer
 
@@ -55,7 +55,7 @@ extern "C" {
 
 		// populate info structure
 		info->infoVersion = PluginInfo::kInfoVersion;
-		info->name = "VRCustomQuickslots";
+		info->name = "VRCustomQuickslots-FO4";
 		info->version = VRCUSTOMQUICKSLOTS_VERSION;
 
 		// store plugin handle so we can identify ourselves later
@@ -93,9 +93,9 @@ extern "C" {
 		g_task = (F4SETaskInterface *)f4se->QueryInterface(kInterface_Task);
 
 		//Registers for SKSE Messages (PapyrusVR probably still need to load, wait for SKSE message PostLoad)
-		_MESSAGE("Registering for SKSE messages");
+		_MESSAGE("Registering for F4SE messages");
 		g_messaging = (F4SEMessagingInterface*)f4se->QueryInterface(kInterface_Messaging);
-		g_messaging->RegisterListener(g_pluginHandle, "SKSE", OnF4SEMessage);
+		g_messaging->RegisterListener(g_pluginHandle, "F4SE", OnF4SEMessage);
 
 
 
@@ -259,8 +259,17 @@ extern "C" {
 		{
 			if (msg->type == F4SEMessagingInterface::kMessage_PostLoad)
 			{
-				_MESSAGE("SKSE PostLoad message received, registering for PapyrusVR messages from FO4VRTools");  // This log msg may happen before XML is loaded
-				g_messaging->RegisterListener(g_pluginHandle, "FO4VRTools", OnPapyrusVRMessage);
+				_MESSAGE("F4SE PostLoad message received, registering for PapyrusVR messages from FO4VRTools");  // This log msg may happen before XML is loaded
+				const bool regResult = g_messaging->RegisterListener(g_pluginHandle, "FO4VRTools", OnPapyrusVRMessage);
+
+				if (regResult)
+				{
+					_MESSAGE("Registered for PapyrusVR Messages");
+				}
+				else
+				{
+					_MESSAGE("Failed to register for PapyrusVR messages!");
+				}
 			}
 			else if (msg->type == F4SEMessagingInterface::kMessage_PreLoadGame) // Use to be DataLoaded //This is needed because we check plugins for items now in ReadConfig function.
 			{

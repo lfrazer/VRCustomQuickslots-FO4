@@ -1,6 +1,6 @@
 /*
-	VRCustomQuickslots - VR Custom Quickslots SKSE extension for SkyrimVR
-	Copyright (C) 2018 L Frazer
+	VRCustomQuickslots - VR Custom Quickslots F4SE extension for Fallout4 VR
+	Copyright (C) 2020 L Frazer
 	https://github.com/lfrazer
 
 	This file is part of VRCustomQuickslots.
