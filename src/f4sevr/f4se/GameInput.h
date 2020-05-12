@@ -320,10 +320,16 @@ public:
 	float	unk84;	// 84
 	UInt32	unk88;	// 88
 	UInt32	unk8C;	// 8C
+	UInt32  unk90;
+	UInt32  unk94;
+	UInt32  unk98;
+	UInt32  unk9C;
 	tArray<PlayerInputHandler*>	inputEvents1;	// 90
 	tArray<PlayerInputHandler*>	inputEvents2;	// A8 - This subset has to do with unk20 and unk21 on the handler
 	// ...
 };
+STATIC_ASSERT(offsetof(PlayerControls, inputEvents1) == 0xA0);
+STATIC_ASSERT(offsetof(PlayerControls, inputEvents2) == 0xB8);
 extern RelocPtr<PlayerControls*> g_playerControls;
 
 class InputDeviceManager

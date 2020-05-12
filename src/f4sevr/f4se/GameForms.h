@@ -408,7 +408,7 @@ public:
 	virtual ModInfo*  GetLastModifiedMod(); // 17 - Returns the ModInfo* of the mod that last modified the form.
 	virtual ModInfo*  GetLastModifiedMod_2(); // 18 - Returns the ModInfo* of the mod that last modified the form. Calls a helper function to do so.
 	virtual UInt8     GetFormType();  // 19
-	virtual void      Unk_1A(); // 1A - GetDebugName(TESForm * form, char * destBuffer, unsigned int bufferSize);
+	virtual void      GetDebugName(TESForm * form, char * destBuffer, unsigned int bufferSize);
 	virtual bool      GetPlayerKnows(); // 1B - Gets flag bit 6.
 	virtual void	Unk_1C();
 	virtual void	Unk_1D();
@@ -822,6 +822,32 @@ public:
 	UInt32				unk44;			// 44
 };
 
+class BGSBodyPartData : public TESForm
+{
+public:
+	enum { kTypeID = kFormType_BPTD };
+
+	// parents
+	TESModel		model;			// 20
+	BGSPreloadable	preloadable;	// 48
+
+									// members
+	struct Data
+	{
+		BSFixedString	unk00;		// 00
+		BSFixedString	unk08;		// 08
+		BSFixedString	unk10;		// 10
+		BSFixedString	unk18;		// 18
+		BSFixedString	unk20;		// 20
+		TESModel		model;		// 28
+		TESModelRDT		modelRDT;	// 50
+	};
+
+	Data	* part[5];		// 50 - init'd to 0
+	UInt64	unk78;			// 78 - init'd to 0
+	UInt64  unk80;			// 80 - init'd to 0
+};
+
 // 6C8
 class TESRace : public TESForm
 {
@@ -993,12 +1019,32 @@ class EffectSetting : public TESForm
 public:
 	enum { kTypeID = kFormType_MGEF };
 
+	enum {
+		kEffectType_Hostile = 0x00000001,
+		kEffectType_Recover = 0x00000002,
+		kEffectType_Detrimental = 0x00000004,
+		kEffectType_NoHitEvent = 0x00000010,
+		kEffectType_DispelKeywords = 0x00000100,
+		kEffectType_NoDuration = 0x00000200,
+		kEffectType_NoMagnitude = 0x00000400,
+		kEffectType_NoArea = 0x00000800,
+		kEffectType_FXPersist = 0x00001000,
+		kEffectType_GloryVisuals = 0x00004000,
+		kEffectType_HideInUI = 0x00008000,
+		kEffectType_NoRecast = 0x00020000,
+		kEffectType_Magnitude = 0x00200000,
+		kEffectType_Duration = 0x00400000,
+		kEffectType_Painless = 0x04000000,
+		kEffectType_NoHitEffect = 0x08000000,
+		kEffectType_NoDeathDispel = 0x10000000
+	};
+
 	TESFullName				fullName;		// 20
 	BGSMenuDisplayObject	menuObject;		// 30
 	BGSKeywordForm			keywordForm;	// 40
 	UInt64					unk060[2]; // 60
-	UInt32					unk070; // 70
-	float					unk074;
+	UInt32					flags; // 70
+	float					baseCost;
 	TESForm*				unk078;	// primary object? (SpellItem, TESObjectLIGH, BGSDamageType, BGSHazard)
 	UInt64					unk080;
 	ActorValueInfo*			actorValInfo88; // 088
@@ -1014,7 +1060,7 @@ public:
 	float					unkC4;
 	float					unkC8;
 	float					unkCC;
-	UInt32					unk0D0; 
+	UInt32					unk0D0; //archetype?
 	UInt32					pad0D4;
 	ActorValueInfo*			actorValInfoD8;
 	BGSProjectile*			projectileE0;
@@ -1569,8 +1615,8 @@ class BGSDamageType : public TESForm
 public:
 	enum { kTypeID = kFormType_DMGT };
 
-	UInt64	unk20;
-	UInt64	unk28;
+	TESForm*	unk20;
+	TESForm*	unk28;
 };
 
 // 48

@@ -128,6 +128,13 @@ public:
 //	void	** _vtbl;
 };
 
+// 10 
+class TESImageSpaceModifiableForm : public BaseFormComponent
+{
+public:
+	UInt64	unk08;	// 08
+};
+
 // 08
 class IKeywordFormBase
 {
@@ -253,7 +260,19 @@ public:
 class TESAIForm : public BaseFormComponent
 {
 public:
-	UInt64	unk08[(0x28 - 0x08) / 8];	// 08
+	// 10 - might be ExtraDataList
+	struct Data
+	{
+		void	*unk0;	// 0
+		Data	* next;	// 8
+	};
+
+	UInt32	flags;		// 08
+	UInt32	unk0C;		// 0C
+	UInt16	unk10;		// 10
+	UInt8	pad12[6];	// 12
+
+	Data	unk18;		// 18
 };
 
 // 10
@@ -269,6 +288,7 @@ class TESSpellList : public BaseFormComponent
 public:
 	void	* unk08;	// 08
 };
+
 
 // 30
 class TESModel : public BaseFormComponent
@@ -298,6 +318,12 @@ public:
 	UInt8				flags;		// 2C
 	UInt8				unk2D;		// 2D
 	UInt16				unk2E;		// 2E
+};
+
+// 28 
+class TESModelRDT : public TESModel
+{
+public:
 };
 
 // 30
@@ -808,6 +834,14 @@ public:
 	virtual void	Unk_1F();
 	virtual void	Unk_20();
 
+	enum {
+		kState_Running = 0x40,
+		kState_Walking = 0x80,
+		kState_Sprinting = 0x100,
+		kState_Sneaking = 0x1000, //for flags
+		kState_Swimming = 0x400
+	};
+	
 	enum Flags
 	{
 		kUnk1 = 0x80000,
@@ -819,7 +853,7 @@ public:
 		kWeaponState_Drawn = 0x03,
 	};
 
-	UInt32	unk08;	// 08
+	UInt32	flags04;	// 08
 	UInt32	flags;	// 0C
 
 	UInt32 GetWeaponState() { return (flags >> kWeaponStateShift) & kWeaponStateMask; }

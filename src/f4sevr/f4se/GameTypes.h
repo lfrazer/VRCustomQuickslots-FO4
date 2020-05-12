@@ -3,6 +3,7 @@
 #include "f4se_common/Utilities.h"
 #include "f4se/GameAPI.h"
 
+
 class TESForm;
 
 // 04 or 08 depending alignment

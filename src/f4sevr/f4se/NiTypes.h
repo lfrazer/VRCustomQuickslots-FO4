@@ -278,6 +278,7 @@ public:
 
 	NiMatrix43 Transpose() const;
 	NiPoint3 operator* (const NiPoint3& pt) const;
+	void GetEulerAngles(float * heading, float * attitude, float * bank);
 };
 
 // math.h

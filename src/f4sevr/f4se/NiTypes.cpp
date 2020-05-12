@@ -92,6 +92,29 @@ NiMatrix43 NiMatrix43::Transpose() const
 	return result;
 }
 
+// http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToEuler/index.htm
+void NiMatrix43::GetEulerAngles(float * heading, float * attitude, float * bank)
+{
+	NiMatrix43 transposed = this->Transpose();
+	
+	if (transposed.data[1][0] > 0.998)
+	{ // singularity at north pole
+		*heading = atan2(transposed.data[0][2], transposed.data[2][2]);
+		*attitude = MATH_PI / 2;
+		*bank = 0;
+	}
+	else if (transposed.data[1][0] < -0.998) { // singularity at south pole
+		*heading = atan2(transposed.data[0][2], transposed.data[2][2]);
+		*attitude = -MATH_PI / 2;
+		*bank = 0;
+	}
+	else {
+		*heading = atan2(-transposed.data[2][0], transposed.data[0][0]);
+		*bank = atan2(-transposed.data[1][2], transposed.data[1][1]);
+		*attitude = asin(transposed.data[1][0]);
+	}
+}
+
 NiPoint3 NiTransform::operator*(const NiPoint3 & pt) const
 {
 	return (((rot * pt) * scale) + pos);

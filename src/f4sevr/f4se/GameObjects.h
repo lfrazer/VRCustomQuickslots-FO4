@@ -113,6 +113,84 @@ public:
 };
 STATIC_ASSERT(sizeof(TESActorBase) == 0x1B0);
 
+class BGSExplosion : public TESBoundObject
+{
+public:
+	enum { kTypeID = kFormType_EXPL };
+
+	// parents
+	TESFullName			fullName;		// 30
+	TESModel			model;			// 40
+	TESEnchantableForm	enchantment;	// 68
+	BGSPreloadable		preloadable;	// 80
+	TESImageSpaceModifiableForm	imageSpaceModifier;	// 88
+
+													// members
+
+													// 50
+	struct Data
+	{
+		UInt64	unk00;	// 00
+		UInt64	unk08;	// 08
+		UInt64	unk10;	// 10
+		UInt64	unk18;	// 18
+		TESObjectREFR*			impactPlacedObject;	// 20
+		UInt64	unk28;	// 28
+		UInt32	unk30;	// 30
+		UInt32	unk34;	// 34
+		UInt32	unk38;	// 38
+		UInt32	unk3C;	// 3C
+		UInt32	unk40;	// 40
+		UInt32	unk44;	// 44
+		UInt32	unk48;	// 48
+		UInt32	unk4C;	// 4C
+	};
+
+	Data	data;	// 98
+};
+
+// B8 
+class BGSHazard : public TESBoundObject
+{
+public:
+	enum { kTypeID = kFormType_HAZD };
+
+	// parents
+	TESFullName		fullName;		// 30
+	TESModel		model;			// 40
+	BGSPreloadable	preloadable;	// 68
+	TESImageSpaceModifiableForm	imageSpaceModifier;	// 70
+
+													// members
+
+													// 38
+	enum class BGSHazardFlags : UInt32
+	{
+		kNone = 0,
+		kPCOnly = 1 << 0,
+		kInheritDuration = 1 << 1,
+		kAlignToNormal = 1 << 2,
+		kInheritRadius = 1 << 3,
+		kDropToGround = 1 << 4
+	};
+	
+	struct Data
+	{
+		UInt32					limit;			   // 00
+		float					radius;			   // 04
+		float					lifetime;		   // 08
+		float					imageSpaceRadius;  // 0C
+		float					targetInterval;	   // 10
+		BGSHazardFlags			flags;			   // 14
+		SpellItem*				spell;			   // 18
+		TESObjectLIGH*			light;			   // 20
+		BGSImpactDataSet*		impactDataSet;	   // 28
+		BGSSoundDescriptorForm* sound;			   // 30
+	};
+
+	Data	unk80;	// 80
+};
+
 // 308
 class TESNPC : public TESActorBase
 {
@@ -273,6 +351,25 @@ class TESObjectWEAP : public TESBoundObject
 public:
 	enum { kTypeID = kFormType_WEAP };
 
+	enum WeaponAnimationType
+	{
+		kWeaponAnimationType_Hand_To_Hand_Melee,
+		kWeaponAnimationType_One_Hand_Sword,
+		kWeaponAnimationType_One_Hand_Dagger,
+		kWeaponAnimationType_One_Hand_Axe,
+		kWeaponAnimationType_One_Hand_Mace,
+		kWeaponAnimationType_Two_Hand_Sword,
+		kWeaponAnimationType_Two_Hand_Axe,
+		kWeaponAnimationType_Bow,
+		kWeaponAnimationType_Staff,
+		kWeaponAnimationType_Gun,
+		kWeaponAnimationType_Grenade,
+		kWeaponAnimationType_Mine,
+		kWeaponAnimationType_Spell,
+		kWeaponAnimationType_Shield,
+		kWeaponAnimationType_Torch
+	};
+
 	// 138
 	struct InstanceData : public TBO_InstanceData
 	{
@@ -290,7 +387,7 @@ public:
 		TESLevItem					* addAmmoList;				// 60 TESLevItem *
 		TESAmmo						* ammo;						// 68 TESAmmo *
 		BGSEquipSlot				* equipSlot;				// 70 BGSEquipSlot*
-		SpellItem					* unk78;					// 78 SpellItem*
+		SpellItem					* spell;					// 78 SpellItem*
 		BGSKeywordForm				* keywords;					// 80
 		BGSAimModel					* aimModel;					// 88 BGSAimModel *
 		BGSZoomData					* zoomData;					// 90 BGSZoomData*
@@ -368,7 +465,7 @@ public:
 		UInt16						baseDamage;					// 132
 		UInt16						unk134;						// 134
 		UInt8						accuracyBonus;				// 136
-		UInt8						unk137;						// 137
+		UInt8						animationType;						// 137
 	};
 
 	// 150
@@ -503,12 +600,41 @@ STATIC_ASSERT(sizeof(BGSTextureSet) == 0x350);
 class MagicItem : public TESBoundObject
 {
 public:
+	struct EffectItem
+	{
+		float	magnitude;		// 00
+		UInt32	area;			// 04
+		UInt32	duration;		// 08
+		UInt32	pad0C;			// 0C
+		EffectSetting* mgef;	// 10
+		float	cost;			// 18 - ?
+		UInt32	unk1C;			// 1C - probably pad
+		void	*unk20;			// 20 - looks like the condition
+
+		EffectItem()
+		{
+			magnitude = 0;
+			area = 0;
+			duration = 0;
+			mgef = NULL;
+			cost = 0.0;
+			unk1C = 0;
+			unk20 = NULL;
+		}
+
+		DEFINE_STATIC_HEAP(Heap_Allocate, Heap_Free);
+	};	
+	
 	TESFullName		name;			// 68
 	BGSKeywordForm	keywordForm;	// 78
-	UnkArray		effectItemsProbably; // 98
-	UInt64			unk0B0[4];		// B0
+	tArray<EffectItem*> effectItemList;	// 98
+	UInt32				hostile;	// B0
+	EffectSetting*		effectTemplate;	// B8
+	UInt32				unk80;	// C0
+	UInt64				unk88;	// C8
 };
-STATIC_ASSERT(offsetof(MagicItem, unk0B0) == 0x0B0);
+STATIC_ASSERT(offsetof(MagicItem, effectItemList) == 0x098);
+STATIC_ASSERT(offsetof(MagicItem, hostile) == 0x0B0);
 STATIC_ASSERT(sizeof(MagicItem) == 0x0D0);
 
 // 1E0
@@ -516,6 +642,14 @@ class AlchemyItem : public MagicItem
 {
 public:
 	enum { kTypeID = kFormType_ALCH };
+
+	enum
+	{
+		kFlag_ManualCalc = 0x00000001,
+		kFlag_Food = 0x00000002,
+		kFlag_Medicine = 0x00010000,
+		kFlag_Poison = 0x00020000,
+	};
 
 	BGSModelMaterialSwap	materialSwap; // 0D0
 	TESIcon					icon;			// 110
@@ -528,8 +662,22 @@ public:
 	TESDescription			description;	// 190
 	UInt32					unk1A8;			// 1A8
 	UInt32					unk1AC;			// 1AC
-	UInt64					unk1B0[4];		// 1B0
+	struct Data
+	{
+		UInt32	value;	// 00 - init'd to FFFFFFFF
+		UInt32	flags;	// 04
+		UInt64	unk08;	// 08 addiction (legacy?)
+		UInt32	unk10;	// 10 addiction chance (legacy?)
+		UInt32	pad14;	// 14
+		BGSSoundDescriptorForm *	useSound;	// 18
+	};
+
+	Data	itemData;		// 1B0
 	TESIcon					icon1D0;		// 1D0
+
+	bool IsFood() { return (itemData.flags & kFlag_Food) != 0; }
+	bool IsPoison() { return (itemData.flags & kFlag_Poison) != 0; }
+	bool IsMedicine() { return (itemData.flags & kFlag_Medicine) != 0; }
 };
 STATIC_ASSERT(offsetof(AlchemyItem, icon1D0) == 0x1D0);
 STATIC_ASSERT(sizeof(AlchemyItem) == 0x1E0);

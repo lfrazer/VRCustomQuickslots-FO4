@@ -119,19 +119,21 @@ Setting * GetGameSetting(const char * name)
 Setting * SettingCollectionList::Get(const char * name)
 {
 	Node * node = data;
-	do
+	if (node)
 	{
-		Setting * setting = node->data;
-		if(setting) {
-			BSAutoFixedString searchName(name);
-			BSAutoFixedString settingName(setting->name);
-			if(searchName == settingName) {
-				return setting;
+		do
+		{
+			Setting * setting = node->data;
+			if (setting) {
+				BSAutoFixedString searchName(name);
+				BSAutoFixedString settingName(setting->name);
+				if (searchName == settingName) {
+					return setting;
+				}
 			}
-		}
 
-		node = node->next;
-	} while(node);
-
+			node = node->next;
+		} while (node);
+	}
 	return nullptr;
 }

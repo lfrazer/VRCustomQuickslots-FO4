@@ -174,6 +174,7 @@ public:
 			return;
 		}
 		
+		
 		HandleButtonEvent(inputEvent);
 	}
 };
@@ -189,7 +190,7 @@ public:
 		{
 			return;
 		}
-
+		
 		HandleButtonEvent(inputEvent);
 	}
 };
@@ -202,7 +203,7 @@ void CreatePlayerControlHandlers_Hook(PlayerControls * playerControls)
 {
 	// Process F4SE handlers first so no events will be blocked
 	// ### not working in VR build, need to check offsets
-//	playerControls->inputEvents1.Push(&g_inputHandler);
+	//playerControls->inputEvents1.Push(&g_inputHandler);
 
 	CreatePlayerControlHandlers_Original(playerControls);
 }

@@ -154,9 +154,9 @@ public:
 	virtual void	Unk_A3();
 	virtual void	Unk_A4();
 	virtual void	Unk_A5();
-	virtual void	Unk_A6();
-	virtual void	Unk_A7();
-	virtual void	Unk_A8();
+	virtual bool	GetAnimationVariableFloat(BSFixedString variableName, float &result);
+	virtual bool	GetAnimationVariableInt(BSFixedString variableName, UInt32 &result);
+	virtual bool	GetAnimationVariableBool(BSFixedString variableName, bool &result);
 	virtual void	Unk_A9();
 	virtual void	Unk_AA();
 	virtual void	Unk_AB();
@@ -219,7 +219,7 @@ public:
 	struct LoadedData
 	{
 		UInt64	unk00;
-		NiNode	* rootNode;
+		NiNode	* node;
 		UInt64	unk10;
 		UInt64	unk18;
 
@@ -232,7 +232,7 @@ public:
 		// ...
 	};
 
-	LoadedData									* unkF0;				// F0 - Root node at 0x08
+	LoadedData									* loadedState;				// F0 - Root node at 0x08
 	BGSInventoryList							* inventoryList;		// F8
 	ExtraDataList								* extraDataList;		// 100 - ExtraData?
 	UInt32										unk104;					// 104
