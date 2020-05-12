@@ -361,7 +361,7 @@ inline bool CanEquipBothHands(Actor* actor, TESForm * item)
 
 
 // Thanks to Shizof for this
-TESObjectWEAP* GetEquippedWeaponForm(Actor* actor)
+inline TESObjectWEAP* GetEquippedWeaponForm(Actor* actor)
 {
 	if (actor->equipData)
 	{

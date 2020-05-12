@@ -37,11 +37,17 @@
 
 #define QS_DEBUG_FEATURES   0
 
+// From Skyrim VR
+/*
 //RelocAddr <_HasSpell> HasSpell(0x0984420);
 RelocAddr <_ActorEquipItem> ActorEquipItem(0x09849C0);
 RelocAddr <_GetItemCount> GetItemCount(0x09CEC90);
 //RelocAddr <_DropObject> DropObject(0x09CE580);
+*/
 
+// FO4VR
+RelocAddr<_ActorEquipItem> ActorEquipItem(0x140CD10);
+RelocAddr<_GetItemCount> GetItemCount(0x148BD50);
 
 CQuickslotManager::CQuickslotManager()
 {
@@ -582,14 +588,10 @@ void CQuickslot::SetAction(PapyrusVR::VRDevice deviceId)
 	{
 		if (formObj)
 		{
-			if (formObj->GetFormType() == kFormType_Weapon)
-			{
-				cmd.mAction = EQUIP_ITEM;
-			}
-			else
-			{
-				cmd.mAction = EQUIP_SPELL;
-			}
+
+			// NO spells in fallout
+			cmd.mAction = EQUIP_ITEM;
+			
 
 			cmd.mSlot = slot;
 			cmd.mFormIDList.clear();

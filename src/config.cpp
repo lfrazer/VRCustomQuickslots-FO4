@@ -223,6 +223,8 @@ bool   CQuickslotManager::ReadConfig(const char* filename)
 					//This is used for dropobject only.
 					subElem->QueryIntAttribute("count", &cmd.mCount);
 
+					// Not supported (yet) in fallout
+					/*
 					int itemType = 0;
 					subElem->QueryIntAttribute("itemtype", &itemType);
 					if(itemType != 0)
@@ -298,6 +300,7 @@ bool   CQuickslotManager::ReadConfig(const char* filename)
 							}
 						}
 					}
+					*/
 
 					// get which slot to use
 					subElem->QueryIntAttribute("slot", &cmd.mSlot);
