@@ -21,6 +21,7 @@
 
 #include "f4se/PluginAPI.h"		// SKSE plugin API
 #include "f4se_common/f4se_version.h"
+#include "MenuChecker.h"
 
 #include "common/IDebugLog.h"
 #include <shlobj.h>				// for use of CSIDL_MYCODUMENTS
@@ -81,11 +82,9 @@ extern "C" {
 		return true;
 	}
 
-	bool F4SEPlugin_Load(const F4SEInterface * f4se) {	// Called by SKSE to load this plugin
-		
-		g_quickslotMgr = new CQuickslotManager;
-		g_Util = new CUtil;
-		
+	bool F4SEPlugin_Load(const F4SEInterface * f4se) 	// Called by F4SE to load this plugin
+	{
+
 		_MESSAGE("VRCustomQuickslots loaded");
 
 		g_papyrus = (F4SEPapyrusInterface *)f4se->QueryInterface(kInterface_Papyrus);
@@ -249,6 +248,33 @@ extern "C" {
 		}
 	}
 
+	static inline void CreateManagersAndRegister()
+	{
+		if (g_quickslotMgr == nullptr)
+		{
+			_MESSAGE("Creating Managers and Registering for PapyrusVR messages from FO4VRTools");  // This log msg may happen before XML is loaded
+
+			// Create objects
+			g_Util = new CUtil();
+			g_quickslotMgr = new CQuickslotManager();
+
+			_MESSAGE("Register Menu event handler");
+
+			MenuChecker::MenuOpenCloseHandler::Register();
+
+			const bool regResult = g_messaging->RegisterListener(g_pluginHandle, "FO4VRTools", OnPapyrusVRMessage);
+
+			if (regResult)
+			{
+				_MESSAGE("Registered for PapyrusVR Messages");
+			}
+			else
+			{
+				_MESSAGE("Failed to register for PapyrusVR messages!");
+			}
+		}
+	}
+
 	//Listener for SKSE Messages
 	void OnF4SEMessage(F4SEMessagingInterface::Message* msg)
 	{
@@ -257,24 +283,15 @@ extern "C" {
 
 		if (msg)
 		{
-			if (msg->type == F4SEMessagingInterface::kMessage_PostLoad)
-			{
-				_MESSAGE("F4SE PostLoad message received, registering for PapyrusVR messages from FO4VRTools");  // This log msg may happen before XML is loaded
-				const bool regResult = g_messaging->RegisterListener(g_pluginHandle, "FO4VRTools", OnPapyrusVRMessage);
+			// Debug log
+			_MESSAGE("Got F4SE Message Type=%u from sender %s", msg->type, msg->sender ? msg->sender : "Unknown");
 
-				if (regResult)
-				{
-					_MESSAGE("Registered for PapyrusVR Messages");
-				}
-				else
-				{
-					_MESSAGE("Failed to register for PapyrusVR messages!");
-				}
-			}
-			else if (msg->type == F4SEMessagingInterface::kMessage_PreLoadGame) // Use to be DataLoaded //This is needed because we check plugins for items now in ReadConfig function.
+			if ( msg->type == F4SEMessagingInterface::kMessage_GameLoaded) //msg->type == F4SEMessagingInterface::kMessage_PostLoad ||
 			{
-				if (g_papyrusvr)
+				//if (g_papyrusvr)
 				{
+					CreateManagersAndRegister();
+
 					_MESSAGE("Initializing VRCustomQuickslots data.");
 					_MESSAGE("Reading XML quickslots config vrcustomquickslots.xml");
 					g_quickslotMgr->ReadConfig(kConfigFile);
@@ -293,7 +310,7 @@ extern "C" {
 						hookMgrAPI->RegisterGetPosesCB(OnGetPosesUpdate);
 
 					}
-					else
+					else if(g_papyrusvr)
 					{
 						QSLOG("Using legacy PapyrusVR API.");
 
@@ -301,11 +318,12 @@ extern "C" {
 						g_papyrusvr->GetVRManager()->RegisterVRButtonListener(OnVRButtonEvent);
 						g_papyrusvr->GetVRManager()->RegisterVRUpdateListener(OnVRUpdateEvent);
 					}
+					else
+					{
+						_MESSAGE("PapyrusVR was not initialized!");
+					}
 				}
-				else
-				{
-					_MESSAGE("PapyrusVR was not initialized!");
-				}
+
 			}
 			else if (msg->type == F4SEMessagingInterface::kMessage_PreLoadGame)
 			{
@@ -359,12 +377,12 @@ extern "C" {
 			}
 			else if (msg->type == F4SEMessagingInterface::kMessage_PostLoadGame || msg->type == F4SEMessagingInterface::kMessage_NewGame)
 			{
-				QSLOG("SKSE PostLoadGame or NewGame message received, type: %d", msg->type);
+				QSLOG("F4SE PostLoadGame or NewGame message received, type: %d", msg->type);
 				g_quickslotMgr->SetInGame(true);
 			}
 			else if (msg->type == F4SEMessagingInterface::kMessage_PreSaveGame)
 			{
-				QSLOG("SKSE SaveGame message received.");
+				QSLOG("F4SE SaveGame message received.");
 
 				if (g_quickslotMgr->AllowEdit())
 				{

@@ -58,6 +58,12 @@ enum eLogLevels
 class CUtil : public ISingleton<CUtil>
 {
 public:
+
+	CUtil() : ISingleton()
+	{
+
+	}
+
 	double	GetLastTime() { return mTimer.GetLastTime();  }
 	void	Update() { mTimer.TimerUpdate(); }
 	void	SetLogLevel(int level) { mLogLevel = level; }
