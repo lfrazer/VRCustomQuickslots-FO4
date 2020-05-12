@@ -50,9 +50,7 @@ RelocAddr<_ActorEquipItem> ActorEquipItem(0x140CD10);
 RelocAddr<_GetItemCount> GetItemCount(0x148BD50);
 
 CQuickslotManager::CQuickslotManager()
-{
-	MenuChecker::MenuOpenCloseHandler::Register();
-	
+{	
 	GetVRSystem();
 
 }
