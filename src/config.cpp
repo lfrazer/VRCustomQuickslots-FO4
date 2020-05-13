@@ -31,13 +31,15 @@
 bool   CQuickslotManager::ReadConfig(const char* filename)
 {
 	// First, read some INI config from game configs
-
+	// Not supported in FO4VR (Crashes.. why?)
+	/*
 	Setting* iniLeftHandSetting = GetINISetting("bLeftHandedMode:VRInput");
 	if (iniLeftHandSetting)
 	{
 		mLeftHandedMode = (int)iniLeftHandSetting->data.u8;
 		_MESSAGE("Left Hand Mode: %d", mLeftHandedMode);
 	}
+	*/
 
 	tinyxml2::XMLDocument xmldoc;
 	tinyxml2::XMLError err = xmldoc.LoadFile(filename);
