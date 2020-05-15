@@ -274,7 +274,7 @@ bool   CQuickslotManager::ReadConfig(const char* filename)
 							}
 							QSLOG_INFO("keywordNot count: %d", keywordsNotArray.size());
 						}
-
+						
 						if(itemType == CQuickslot::eItemType::Ingestible)
 						{
 							subElem->QueryIntAttribute("potion", &cmd.mPotion);

@@ -590,7 +590,6 @@ void CQuickslot::SetAction(PapyrusVR::VRDevice deviceId)
 			// NO spells in fallout
 			cmd.mAction = EQUIP_ITEM;
 			
-
 			cmd.mSlot = slot;
 			cmd.mFormIDList.clear();
 			cmd.mFormIDList.emplace_back(formObj->formID);

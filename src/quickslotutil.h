@@ -371,7 +371,9 @@ inline TESObjectWEAP* GetEquippedWeaponForm(Actor* actor)
 {
 	if (actor->equipData)
 	{
-		auto slots = { 0x20, 0x21, 0x25, 0x29 };
+		const UInt32 kNumSlots = 4;
+
+		const UInt32 slots[kNumSlots] = { 0x20, 0x21, 0x25, 0x29 };
 		for (UInt32 slotId : slots)
 		{
 			if (actor->equipData->slots[slotId].item != nullptr)
