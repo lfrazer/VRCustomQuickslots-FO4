@@ -43,7 +43,7 @@ vr::IVRSystem*	g_VRSystem = nullptr; // only set by new RAW api from Hook Mgr
 
 const char* kConfigFile = "Data\\F4SE\\Plugins\\vrcustomquickslots.xml";
 const char* kConfigFileUniqueId = "Data\\F4SE\\Plugins\\vrcustomquickslots_%s.xml";
-const int VRCUSTOMQUICKSLOTS_VERSION = 5;
+const int VRCUSTOMQUICKSLOTS_VERSION = 1;
 
 extern "C" {
 
@@ -297,12 +297,12 @@ extern "C" {
 					g_quickslotMgr->ReadConfig(kConfigFile);
 
 					QSLOG("XML config load complete.");
-					QSLOG("VRCustomQuickslots Plugin version: %d", VRCUSTOMQUICKSLOTS_VERSION);
+					QSLOG("VRCustomQuickslots Plugin version: %x", VRCUSTOMQUICKSLOTS_VERSION);
 
 					OpenVRHookManagerAPI* hookMgrAPI = RequestOpenVRHookManagerObject();
 					if (hookMgrAPI && !g_quickslotMgr->DisableRawAPI())
 					{
-						QSLOG("Using new RAW OpenVR Hook API.");
+						QSLOG("Using new RAW OpenVR Hook API. VRTools Hook API Version=0x%x", hookMgrAPI->GetVersion());
 
 						g_quickslotMgr->SetHookMgr(hookMgrAPI);
 						g_VRSystem = hookMgrAPI->GetVRSystem(); // setup VR system before callbacks
@@ -349,7 +349,7 @@ extern "C" {
 				
 				// index 1 will always be the uniqueId based on the format of save game names
 				const char* playerUID = saveNameTokens[1];
-				_MESSAGE("SKSE PreLoadGame message received, save file name: %s UniqueID: %s", (char*)msg->data, playerUID ? playerUID : "NULL");
+				_MESSAGE("F4SE PreLoadGame message received, save file name: %s UniqueID: %s", (char*)msg->data, playerUID ? playerUID : "NULL");
 
 				
 				if (playerUID)
